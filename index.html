@@ -1,0 +1,86 @@
+<html>
+  <head>
+    <title>Detect Headless</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="styles/test_headless.css" type="text/css">
+  </head>
+  <body>
+    <table class="tests" id="tests">
+      <tr>
+        <th>Test</th>
+        <th>Result</th>
+      </tr>
+    </table>
+
+    <table id="location">
+      <tr>
+        <th>Name</th>
+        <th>Value</th>
+      </tr>
+    </table>
+    <div class="legend">
+      
+      <ul>
+        <div id="mapdiv" ></div>
+        <li><span class="headful"></span>Headful</li>
+        <li><span class="headless"></span>Headless</li>
+        <li><span class="undefined"></span>Undefined</li>
+      </ul>
+    </div>
+
+    
+    <script type="text/javascript" src="scripts/detect_headless.js"></script>
+    <script src="scripts/OpenLayers.js"></script>
+
+    <script>
+      
+  
+
+
+
+      fetch('https://api.ipdata.co/?api-key=test')
+  .then(function(response) {
+    return response.json();
+  })
+  .then(function(data) {
+    console.log(data)
+    const yeet = [
+      { name: "IP",        id: data.ip, },
+      { name: "asn",       id: data.asn.name ,},
+      { name: "Country",       id: data.country_name,},
+      { name: "latitude",       id: data.latitude ,},
+      { name: "longitude",       id: data.longitude ,},
+    ];
+    fillIp(yeet)
+    createMap(data.longitude, data.latitude)
+  });
+
+  fillIp = (yeet) =>  {
+  yeet.forEach(test => {
+  let resultBlock = generateTableRow("location", test.name, test.id);
+  writeToBlock(resultBlock, test.id)
+
+  });
+
+  }
+  
+  createMap = (lon, lat) =>  {
+    map = new OpenLayers.Map("mapdiv");
+    map.addLayer(new OpenLayers.Layer.OSM());
+
+    var lonLat = new OpenLayers.LonLat( lon ,lat )
+          .transform(
+            new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+            map.getProjectionObject() // to Spherical Mercator Projection
+          );
+    var zoom=10;
+    var markers = new OpenLayers.Layer.Markers( "Markers" );
+    map.addLayer(markers);
+    markers.addMarker(new OpenLayers.Marker(lonLat));
+    map.setCenter (lonLat, zoom);
+    document.getElementById("OpenLayers_Control_Attribution_7").style.display = "none"
+  } 
+
+    </script>
+  </body>
+</html>
